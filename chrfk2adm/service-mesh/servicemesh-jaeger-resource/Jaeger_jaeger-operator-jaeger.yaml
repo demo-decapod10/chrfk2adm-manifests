@@ -35,6 +35,11 @@ spec:
               - enabled
   storage:
     type: elasticsearch
+    esIndexCleaner:
+      enabled: true
+      image: jaegertracing/jaeger-es-index-cleaner:1.29.0
+      numberOfDays: 7
+      schedule: "55 04 * * *"
     options:
       es:
         index-prefix: jaeger
