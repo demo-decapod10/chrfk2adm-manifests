@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-view_cluster global
+  name: grafana-kubernetes-viewclusterglobal
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-View_Cluster Global.json: |-
+  kubernetes-ViewClusterGlobal.json: |-
     {
       "annotations": {
         "list": [

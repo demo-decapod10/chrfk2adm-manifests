@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-system_coredns
+  name: grafana-kubernetes-systemcoredns
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-System_CoreDNS.json: |-
+  kubernetes-SystemCoreDNS.json: |-
     {
       "annotations": {
         "list": [

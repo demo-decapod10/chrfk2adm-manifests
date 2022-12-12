@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-views_pods_v2
+  name: grafana-kubernetes-viewnamespaces
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-Views_Pods_v2.json: |-
+  kubernetes-ViewNamespaces.json: |-
     {
       "annotations": {
         "list": [
@@ -32,13 +32,13 @@ data:
           }
         ]
       },
-      "description": "This is a 'Pods View' dashboard for your Kubernetes cluster(s). Made for prometheus and take advantage of the latest Grafana features. Originated from GitHub repository: https://github.com/dotdc/grafana-dashboards-kubernetes",
+      "description": "This is a 'Namespaces View' dashboard for your Kubernetes cluster(s). Made for prometheus and take advantage of the latest Grafana features. Orginated from GitHub repository: https://github.com/dotdc/grafana-dashboards-kubernetes",
       "editable": false,
       "fiscalYearStartMonth": 0,
-      "gnetId": 15760,
+      "gnetId": 15758,
       "graphTooltip": 1,
-      "id": 36,
-      "iteration": 1670547297685,
+      "id": 35,
+      "iteration": 1670547204829,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -54,18 +54,9 @@ data:
             "x": 0,
             "y": 0
           },
-          "id": 43,
+          "id": 38,
           "panels": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "datasource",
-                "uid": "grafana"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Information ($taco_cluster :: $namespace :: $pod)",
+          "title": "Overview ($taco_cluster :: $namespace)",
           "type": "row"
         },
         {
@@ -75,31 +66,39 @@ data:
           },
           "fieldConfig": {
             "defaults": {
+              "decimals": 2,
               "mappings": [],
+              "max": 1,
+              "min": 0,
               "thresholds": {
-                "mode": "absolute",
+                "mode": "percentage",
                 "steps": [
                   {
-                    "color": "rgb(255, 255, 255)",
+                    "color": "green",
                     "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 50
+                  },
+                  {
+                    "color": "red",
+                    "value": 70
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "percentunit"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 2,
-            "w": 12,
+            "h": 7,
+            "w": 6,
             "x": 0,
             "y": 1
           },
-          "id": 2,
+          "id": 46,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "auto",
             "orientation": "auto",
             "reduceOptions": {
               "calcs": [
@@ -108,7 +107,81 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "name"
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "text": {}
+          },
+          "pluginVersion": "8.3.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\", image!=\"\"}[$__rate_interval])) / sum(machine_cpu_cores{taco_cluster=\"$taco_cluster\"})",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "range": false,
+              "refId": "A"
+            }
+          ],
+          "title": "Namespace(s) usage on total cluster CPU in %",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 2,
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 50
+                  },
+                  {
+                    "color": "red",
+                    "value": 70
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 6,
+            "x": 6,
+            "y": 1
+          },
+          "id": 48,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "text": {}
           },
           "pluginVersion": "8.3.3",
           "targets": [
@@ -118,14 +191,14 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "kube_pod_info{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}",
+              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) / sum(machine_memory_bytes{taco_cluster=\"$taco_cluster\"})",
               "interval": "",
-              "legendFormat": "{{ created_by_kind }}: {{ created_by_name }}",
+              "legendFormat": "",
               "refId": "A"
             }
           ],
-          "title": "Created by",
-          "type": "stat"
+          "title": "Namespace(s) usage on total cluster RAM in %",
+          "type": "gauge"
         },
         {
           "datasource": {
@@ -134,40 +207,79 @@ data:
           },
           "fieldConfig": {
             "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgb(255, 255, 255)",
+                    "color": "green",
                     "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
                   }
                 ]
               },
-              "unit": "none"
+              "unit": "short"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 2,
-            "w": 6,
+            "h": 11,
+            "w": 12,
             "x": 12,
             "y": 1
           },
-          "id": 33,
+          "id": 32,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
+            "legend": {
               "calcs": [
+                "min",
+                "max",
                 "mean"
               ],
-              "fields": "",
-              "values": false
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Max",
+              "sortDesc": true
             },
-            "textMode": "name"
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
           },
           "pluginVersion": "8.3.3",
           "targets": [
@@ -177,14 +289,124 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "kube_pod_info{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}",
+              "expr": "sum(kube_pod_container_status_running{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
               "interval": "",
-              "legendFormat": "{{ node }}",
+              "legendFormat": "Running Pods",
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_service_info{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Services",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_ingress_info{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Ingresses",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_deployment_labels{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Deployments",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_statefulset_labels{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Statefulsets",
+              "refId": "E"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_daemonset_labels{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Daemonsets",
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_persistentvolumeclaim_info{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Persistent Volume Claims",
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_hpa_labels{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Horizontal Pod Autoscalers",
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_configmap_info{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Configmaps",
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_secret_info{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Secrets",
+              "refId": "J"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_networkpolicy_labels{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Network Policies",
+              "refId": "K"
             }
           ],
-          "title": "Running on",
-          "type": "stat"
+          "title": "Kubernetes Resource Count",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -194,6 +416,7 @@ data:
           "fieldConfig": {
             "defaults": {
               "mappings": [],
+              "noValue": "0",
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -208,12 +431,117 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 2,
+            "h": 4,
             "w": 6,
-            "x": 18,
-            "y": 1
+            "x": 0,
+            "y": 8
           },
-          "id": 41,
+          "id": 62,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.3.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}[$__rate_interval]))",
+              "interval": "",
+              "legendFormat": "Real",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_resource_requests{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\", unit=\"core\"})",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Requests",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_resource_limits{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\", unit=\"core\"})",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Limits",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(machine_cpu_cores{taco_cluster=\"$taco_cluster\"})",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Cluster Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "Namespace(s) CPU Usage in cores",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgb(255, 255, 255)",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 8
+          },
+          "id": 64,
           "options": {
             "colorMode": "none",
             "graphMode": "none",
@@ -226,7 +554,8 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "name"
+            "text": {},
+            "textMode": "auto"
           },
           "pluginVersion": "8.3.3",
           "targets": [
@@ -235,14 +564,58 @@ data:
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
+              "editorMode": "code",
               "exemplar": true,
-              "expr": "kube_pod_info{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}",
+              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
               "interval": "",
-              "legendFormat": "{{ pod_ip }}",
+              "legendFormat": "Real",
+              "range": true,
               "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_resource_requests{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\", unit=\"byte\"})",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Requests",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_resource_limits{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\", unit=\"byte\"})",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Limits",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(machine_memory_bytes{taco_cluster=\"$taco_cluster\"})",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Cluster Total",
+              "range": true,
+              "refId": "D"
             }
           ],
-          "title": "Pod IP",
+          "title": "Namespace(s) RAM Usage in bytes",
           "type": "stat"
         },
         {
@@ -255,812 +628,12 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 3
-          },
-          "id": 47,
-          "panels": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "datasource",
-                "uid": "grafana"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Resources ($taco_cluster :: $namespace :: $pod)",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "blue",
-                "mode": "fixed"
-              },
-              "decimals": 2,
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 60
-                  },
-                  {
-                    "color": "red",
-                    "value": 75
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 3,
-            "x": 0,
-            "y": 4
-          },
-          "id": 39,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}[$__rate_interval])) / sum(kube_pod_container_resource_requests{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"core\"})",
-              "instant": true,
-              "interval": "$resolution",
-              "legendFormat": "Requests",
-              "refId": "A"
-            }
-          ],
-          "title": "Total pod CPU Requests usage",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 2,
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 60
-                  },
-                  {
-                    "color": "red",
-                    "value": 75
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 3,
-            "x": 3,
-            "y": 4
-          },
-          "id": 48,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}[$__rate_interval])) / sum(kube_pod_container_resource_limits{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\", unit=\"core\"})",
-              "instant": true,
-              "interval": "$resolution",
-              "legendFormat": "Limits",
-              "refId": "A"
-            }
-          ],
-          "title": "Total pod CPU Limits usage",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "blue",
-                "mode": "fixed"
-              },
-              "decimals": 2,
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "blue",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 80
-                  },
-                  {
-                    "color": "red",
-                    "value": 99
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 3,
-            "x": 6,
-            "y": 4
+            "y": 12
           },
           "id": 40,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}) / sum(kube_pod_container_resource_requests{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"byte\"})",
-              "instant": true,
-              "interval": "$resolution",
-              "legendFormat": "Requests",
-              "refId": "A"
-            }
-          ],
-          "title": "Total pod RAM Requests usage",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 2,
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 60
-                  },
-                  {
-                    "color": "red",
-                    "value": 75
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 3,
-            "x": 9,
-            "y": 4
-          },
-          "id": 49,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}) / sum(kube_pod_container_resource_limits{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"byte\"}) ",
-              "instant": true,
-              "interval": "$resolution",
-              "legendFormat": "Limits",
-              "refId": "B"
-            }
-          ],
-          "title": "Total pod RAM Limits usage",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "filterable": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "blue",
-                    "value": null
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Memory Requests"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "bytes"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Memory Limits"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "bytes"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Memory Used"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "bytes"
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 4
-          },
-          "id": 38,
-          "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": []
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(kube_pod_container_resource_requests{namespace=\"$namespace\", pod=\"$pod\", unit=\"core\"}) by (container)",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(kube_pod_container_resource_limits{namespace=\"$namespace\", pod=\"$pod\", unit=\"core\"}) by (container)",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(kube_pod_container_resource_requests{namespace=\"$namespace\", pod=\"$pod\", unit=\"byte\"}) by (container)",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": false,
-              "expr": "sum(kube_pod_container_resource_limits{namespace=\"$namespace\", pod=\"$pod\", unit=\"byte\"}) by (container)",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "D"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\", pod=\"$pod\", image!=\"\", container!=\"POD\"}[$__rate_interval])) by (container)",
-              "format": "table",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "__auto",
-              "range": false,
-              "refId": "E"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\", pod=\"$pod\", image!=\"\", container!=\"POD\"}) by (container)",
-              "format": "table",
-              "hide": false,
-              "instant": true,
-              "range": false,
-              "refId": "F"
-            }
-          ],
-          "title": "Resources by container",
-          "transformations": [
-            {
-              "id": "seriesToColumns",
-              "options": {
-                "byField": "container"
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "Time 1": true,
-                  "Time 2": true,
-                  "Time 4": true,
-                  "__name__": true,
-                  "__name__ 1": true,
-                  "__name__ 2": true,
-                  "__name__ 3": true,
-                  "__name__ 4": true,
-                  "container": false,
-                  "endpoint": true,
-                  "endpoint 2": true,
-                  "endpoint 3": true,
-                  "endpoint 4": true,
-                  "instance": true,
-                  "instance 2": true,
-                  "instance 3": true,
-                  "instance 4": true,
-                  "job": true,
-                  "job 2": true,
-                  "job 3": true,
-                  "job 4": true,
-                  "namespace": true,
-                  "namespace 2": true,
-                  "namespace 3": true,
-                  "namespace 4": true,
-                  "node": true,
-                  "node 2": true,
-                  "node 3": true,
-                  "node 4": true,
-                  "pod": true,
-                  "pod 2": true,
-                  "pod 3": true,
-                  "pod 4": true,
-                  "resource 1": true,
-                  "resource 2": true,
-                  "resource 3": true,
-                  "resource 4": true,
-                  "service": true,
-                  "service 2": true,
-                  "service 3": true,
-                  "service 4": true,
-                  "uid 1": true,
-                  "uid 2": true,
-                  "uid 3": true,
-                  "uid 4": true,
-                  "unit 1": true,
-                  "unit 2": true,
-                  "unit 3": true,
-                  "unit 4": true
-                },
-                "indexByName": {
-                  "Time 1": 7,
-                  "Time 2": 8,
-                  "Time 3": 9,
-                  "Time 4": 10,
-                  "Time 5": 11,
-                  "Time 6": 12,
-                  "Value #A": 2,
-                  "Value #B": 3,
-                  "Value #C": 5,
-                  "Value #D": 6,
-                  "Value #E": 1,
-                  "Value #F": 4,
-                  "container": 0
-                },
-                "renameByName": {
-                  "Value #A": "CPU Requests",
-                  "Value #B": "CPU Limits",
-                  "Value #C": "Memory Requests",
-                  "Value #D": "Memory Limits",
-                  "Value #E": "CPU Used",
-                  "Value #F": "Memory Used",
-                  "container": "Container"
-                }
-              }
-            }
-          ],
-          "type": "table"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "axisLabel": "Percent",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 25,
-                "gradientMode": "opacity",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "smooth",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "area"
-                }
-              },
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 20
-                  },
-                  {
-                    "color": "green",
-                    "value": 30
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 70
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 12
-          },
-          "id": 50,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "table",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": true,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}[$__rate_interval])) by (container) / sum(kube_pod_container_resource_requests{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"core\"}) by (container)",
-              "interval": "$resolution",
-              "legendFormat": "{{ container }}  : REQUESTS",
-              "range": true,
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": true,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}[$__rate_interval])) by (container) / sum(kube_pod_container_resource_limits{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"core\"}) by (container)",
-              "hide": false,
-              "interval": "",
-              "legendFormat": "{{ container }}  : LIMITS",
-              "range": true,
-              "refId": "B"
-            }
-          ],
-          "title": "CPU Usage / Requests & Limits by container",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "blue",
-                "mode": "thresholds"
-              },
-              "custom": {
-                "axisLabel": "Percent",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 25,
-                "gradientMode": "opacity",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "smooth",
-                "lineStyle": {
-                  "fill": "solid"
-                },
-                "lineWidth": 2,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": true,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "area"
-                }
-              },
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 20
-                  },
-                  {
-                    "color": "green",
-                    "value": 30
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 70
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 12
-          },
-          "id": 30,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "table",
-              "placement": "right",
-              "showLegend": true
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          },
-          "pluginVersion": "8.3.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": true,
-              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}) by (container) / sum(kube_pod_container_resource_requests{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"byte\"}) by (container)",
-              "interval": "",
-              "legendFormat": "{{ container }} : REQUESTS",
-              "range": true,
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": true,
-              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\"}) by (container) / sum(kube_pod_container_resource_limits{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", unit=\"byte\"}) by (container)",
-              "hide": false,
-              "interval": "",
-              "legendFormat": "{{ container }} : LIMITS",
-              "range": true,
-              "refId": "B"
-            }
-          ],
-          "title": "Memory Usage / Requests & Limits by container",
-          "type": "timeseries"
+          "panels": [],
+          "title": "Resources ($taco_cluster :: $namespace)",
+          "type": "row"
         },
         {
           "datasource": {
@@ -1116,33 +689,13 @@ data:
               },
               "unit": "none"
             },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "limit"
-                },
-                "properties": [
-                  {
-                    "id": "color",
-                    "value": {
-                      "fixedColor": "#F2495C",
-                      "mode": "fixed"
-                    }
-                  },
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  }
-                ]
-              }
-            ]
+            "overrides": []
           },
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 20
+            "y": 13
           },
           "id": 29,
           "options": {
@@ -1153,8 +706,8 @@ data:
               "showLegend": true
             },
             "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
+              "mode": "single",
+              "sort": "none"
             }
           },
           "pluginVersion": "8.3.3",
@@ -1165,13 +718,13 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\", image!=\"\", container!=\"POD\"}[$__rate_interval])) by (container)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\",image!=\"\"}[$__rate_interval])) by (pod)",
               "interval": "$resolution",
-              "legendFormat": "{{ container }}",
+              "legendFormat": "{{ pod }}",
               "refId": "A"
             }
           ],
-          "title": "CPU Usage by container",
+          "title": "CPU usage by Pod",
           "type": "timeseries"
         },
         {
@@ -1185,7 +738,7 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
-                "axisLabel": "Bytes",
+                "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
@@ -1197,9 +750,6 @@ data:
                   "viz": false
                 },
                 "lineInterpolation": "smooth",
-                "lineStyle": {
-                  "fill": "solid"
-                },
                 "lineWidth": 2,
                 "pointSize": 5,
                 "scaleDistribution": {
@@ -1237,9 +787,9 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 20
+            "y": 13
           },
-          "id": 51,
+          "id": 30,
           "options": {
             "legend": {
               "calcs": [],
@@ -1248,8 +798,8 @@ data:
               "showLegend": true
             },
             "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
+              "mode": "single",
+              "sort": "none"
             }
           },
           "pluginVersion": "8.3.3",
@@ -1260,13 +810,13 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\", image!=\"\", container!=\"POD\"}) by (container)",
-              "interval": "",
-              "legendFormat": "{{ container }}",
+              "expr": "sum(container_memory_working_set_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\", image!=\"\"}) by (pod)",
+              "interval": "$resolution",
+              "legendFormat": "{{ pod }}",
               "refId": "A"
             }
           ],
-          "title": "Memory Usage by container",
+          "title": "Memory usage by Pod",
           "type": "timeseries"
         },
         {
@@ -1279,20 +829,11 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 28
+            "y": 21
           },
-          "id": 45,
+          "id": 44,
           "panels": [],
-          "targets": [
-            {
-              "datasource": {
-                "type": "datasource",
-                "uid": "grafana"
-              },
-              "refId": "A"
-            }
-          ],
-          "title": "Network ($taco_cluster :: $namespace :: $pod)",
+          "title": "Kubernetes Resources ($taco_cluster :: $namespace)",
           "type": "row"
         },
         {
@@ -1333,6 +874,7 @@ data:
                   "mode": "off"
                 }
               },
+              "decimals": 0,
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -1347,7 +889,7 @@ data:
                   }
                 ]
               },
-              "unit": "bytes"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1355,19 +897,19 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 29
+            "y": 22
           },
-          "id": 31,
+          "id": 5,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true
+              "showLegend": false
             },
             "tooltip": {
               "mode": "multi",
-              "sort": "none"
+              "sort": "desc"
             }
           },
           "pluginVersion": "8.3.3",
@@ -1378,9 +920,9 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(container_network_receive_bytes_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Received",
+              "expr": "sum(kube_pod_container_status_ready{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Ready",
               "refId": "A"
             },
             {
@@ -1389,13 +931,46 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "- sum(rate(container_network_transmit_bytes_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Transmitted",
+              "expr": "sum(kube_pod_container_status_running{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Running",
               "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_status_waiting{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Waiting",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_status_restarts_total{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Restarts Total",
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kube_pod_container_status_terminated{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"})",
+              "interval": "",
+              "legendFormat": "Terminated",
+              "refId": "E"
             }
           ],
-          "title": "Network - Bandwidth",
+          "title": "Nb of pods by state",
           "type": "timeseries"
         },
         {
@@ -1436,6 +1011,7 @@ data:
                   "mode": "off"
                 }
               },
+              "decimals": 0,
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -1450,7 +1026,7 @@ data:
                   }
                 ]
               },
-              "unit": "pps"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1458,15 +1034,15 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 29
+            "y": 22
           },
-          "id": 34,
+          "id": 2,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true
+              "showLegend": false
             },
             "tooltip": {
               "mode": "multi",
@@ -1481,24 +1057,13 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(container_network_receive_packets_total{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Received",
+              "expr": "sum(kube_pod_container_info{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (pod)",
+              "interval": "",
+              "legendFormat": "{{ pod }}",
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "exemplar": true,
-              "expr": "- sum(rate(container_network_transmit_packets_total{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Transmitted",
-              "refId": "B"
             }
           ],
-          "title": "Network - Packets Rate",
+          "title": "Nb of containers by pod",
           "type": "timeseries"
         },
         {
@@ -1530,7 +1095,7 @@ data:
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": false,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -1553,7 +1118,7 @@ data:
                   }
                 ]
               },
-              "unit": "pps"
+              "unit": "short"
             },
             "overrides": []
           },
@@ -1561,15 +1126,15 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 37
+            "y": 30
           },
-          "id": 36,
+          "id": 7,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true
+              "showLegend": false
             },
             "tooltip": {
               "mode": "multi",
@@ -1584,24 +1149,215 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(container_network_receive_packets_dropped_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Received ",
+              "expr": "sum(kube_deployment_status_replicas_available{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (deployment)",
+              "interval": "",
+              "legendFormat": "{{ deployment }}",
               "refId": "A"
+            }
+          ],
+          "title": "Replicas available by deployment",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
             },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 30
+          },
+          "id": 8,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "8.3.3",
+          "targets": [
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "- sum(rate(container_network_transmit_packets_dropped_total{taco_cluster=\"$taco_cluster\",namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Transmitted",
-              "refId": "B"
+              "expr": "sum(kube_deployment_status_replicas_unavailable{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (deployment)",
+              "interval": "",
+              "legendFormat": "{{ deployment }}",
+              "refId": "A"
             }
           ],
-          "title": "Network - Packets Dropped",
+          "title": "Replicas unavailable by deployment",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 38
+          },
+          "id": 42,
+          "panels": [],
+          "title": "Kubernetes PV Storage ($taco_cluster :: $namespace)",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 39
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "8.3.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "exemplar": true,
+              "expr": "sum(kubelet_volume_stats_used_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (persistentvolumeclaim) / sum(kubelet_volume_stats_capacity_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (persistentvolumeclaim)",
+              "interval": "",
+              "legendFormat": "{{ persistentvolumeclaim }}",
+              "refId": "A"
+            }
+          ],
+          "title": "Persistent Volumes - Capacity",
           "type": "timeseries"
         },
         {
@@ -1642,6 +1398,7 @@ data:
                   "mode": "off"
                 }
               },
+              "decimals": 2,
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
@@ -1656,7 +1413,7 @@ data:
                   }
                 ]
               },
-              "unit": "pps"
+              "unit": "percent"
             },
             "overrides": []
           },
@@ -1664,19 +1421,19 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 37
+            "y": 39
           },
-          "id": 37,
+          "id": 27,
           "options": {
             "legend": {
               "calcs": [],
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true
+              "showLegend": false
             },
             "tooltip": {
               "mode": "multi",
-              "sort": "none"
+              "sort": "desc"
             }
           },
           "pluginVersion": "8.3.3",
@@ -1687,25 +1444,80 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(container_network_receive_errors_total{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Received",
+              "expr": "sum(kubelet_volume_stats_inodes_used{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (persistentvolumeclaim) / sum(kubelet_volume_stats_inodes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) by (persistentvolumeclaim) * 100",
+              "interval": "",
+              "legendFormat": "{{ persistentvolumeclaim }}",
               "refId": "A"
+            }
+          ],
+          "title": "Persistent Volumes - Inodes",
+          "type": "timeseries"
+        },
+        {
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "noValue": "No PV",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 75
+                  },
+                  {
+                    "color": "red",
+                    "value": 85
+                  }
+                ]
+              },
+              "unit": "percent"
             },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 11,
+            "w": 24,
+            "x": 0,
+            "y": 47
+          },
+          "id": 66,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "8.3.3",
+          "targets": [
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${datasource}"
+                "uid": "PBFA97CFB590B2093"
               },
-              "exemplar": true,
-              "expr": "- sum(rate(container_network_transmit_errors_total{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\", pod=\"$pod\"}[$__rate_interval]))",
-              "interval": "$resolution",
-              "legendFormat": "Transmitted",
-              "refId": "B"
+              "exemplar": false,
+              "expr": "(kubelet_volume_stats_used_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"} / kubelet_volume_stats_capacity_bytes{taco_cluster=\"$taco_cluster\",namespace=~\"$namespace\"}) * 100 ",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{persistentvolumeclaim}}",
+              "refId": "A"
             }
           ],
-          "title": "Network - Errors",
-          "type": "timeseries"
+          "title": "PV Usage (%) ",
+          "type": "bargauge"
         }
       ],
       "refresh": "30s",
@@ -1761,9 +1573,13 @@ data:
           },
           {
             "current": {
-              "selected": false,
-              "text": "elastic-system",
-              "value": "elastic-system"
+              "selected": true,
+              "text": [
+                "All"
+              ],
+              "value": [
+                "$__all"
+              ]
             },
             "datasource": {
               "type": "prometheus",
@@ -1771,44 +1587,15 @@ data:
             },
             "definition": "label_values(kube_pod_info{taco_cluster=\"$taco_cluster\"}, namespace)",
             "hide": 0,
-            "includeAll": false,
-            "multi": false,
+            "includeAll": true,
+            "multi": true,
             "name": "namespace",
             "options": [],
             "query": {
               "query": "label_values(kube_pod_info{taco_cluster=\"$taco_cluster\"}, namespace)",
-              "refId": "Prometheus-namespace-Variable-Query"
+              "refId": "StandardVariableQuery"
             },
             "refresh": 1,
-            "regex": "",
-            "skipUrlSync": false,
-            "sort": 1,
-            "tagValuesQuery": "",
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "current": {
-              "selected": false,
-              "text": "elastic-operator-0",
-              "value": "elastic-operator-0"
-            },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "definition": "label_values(kube_pod_info{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\"}, pod)",
-            "hide": 0,
-            "includeAll": false,
-            "multi": false,
-            "name": "pod",
-            "options": [],
-            "query": {
-              "query": "label_values(kube_pod_info{taco_cluster=\"$taco_cluster\", namespace=\"$namespace\"}, pod)",
-              "refId": "Prometheus-pod-Variable-Query"
-            },
-            "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
             "sort": 1,
@@ -1872,8 +1659,8 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "[TKS] Kubernetes / Views / Pods (v2)",
-      "uid": "tks-ddChEXF4z",
-      "version": 2,
+      "title": "[TKS] Kubernetes / View / Namespaces",
+      "uid": "tks-IcQ5PXK4k",
+      "version": 1,
       "weekStart": ""
     }

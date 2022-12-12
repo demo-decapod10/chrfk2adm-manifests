@@ -3,13 +3,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-reference_nodes
+  name: grafana-kubernetes-referencenodes
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-Reference_Nodes.json: |-
+  kubernetes-ReferenceNodes.json: |-
     {
       "annotations": {
         "list": [
