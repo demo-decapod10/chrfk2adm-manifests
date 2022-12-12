@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-systemetcd
+  name: grafana-kubernetes-system_etcd
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-SystemEtcd.json: |-
+  kubernetes-System_Etcd.json: |-
     {
       "annotations": {
         "list": [

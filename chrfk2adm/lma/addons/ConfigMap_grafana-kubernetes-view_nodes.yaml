@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-viewnodes
+  name: grafana-kubernetes-view_nodes
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-ViewNodes.json: |-
+  kubernetes-View_Nodes.json: |-
     {
       "annotations": {
         "list": [

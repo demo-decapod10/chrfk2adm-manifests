@@ -3,13 +3,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-referencenodes
+  name: grafana-kubernetes-reference_nodes
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-ReferenceNodes.json: |-
+  kubernetes-Reference_Nodes.json: |-
     {
       "annotations": {
         "list": [
@@ -21763,7 +21763,7 @@ data:
               "type": "prometheus",
               "uid": "Prometheus"
             },
-            "definition": "label_values(node_uname_info, job)",
+            "definition": "label_values(node_uname_info{taco_cluster=\"$taco_cluster\"}, job)",
             "hide": 0,
             "includeAll": false,
             "label": "Job",
@@ -21771,7 +21771,7 @@ data:
             "name": "job",
             "options": [],
             "query": {
-              "query": "label_values(node_uname_info, job)",
+              "query": "label_values(node_uname_info{taco_cluster=\"$taco_cluster\"}, job)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,
@@ -21793,7 +21793,7 @@ data:
               "type": "prometheus",
               "uid": "Prometheus"
             },
-            "definition": "label_values(node_uname_info{job=\"$job\"}, instance)",
+            "definition": "label_values(node_uname_info{taco_cluster=\"$taco_cluster\", job=\"$job\"}, instance)",
             "hide": 0,
             "includeAll": false,
             "label": "Host:",
@@ -21801,7 +21801,7 @@ data:
             "name": "node",
             "options": [],
             "query": {
-              "query": "label_values(node_uname_info{job=\"$job\"}, instance)",
+              "query": "label_values(node_uname_info{taco_cluster=\"$taco_cluster\", job=\"$job\"}, instance)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,

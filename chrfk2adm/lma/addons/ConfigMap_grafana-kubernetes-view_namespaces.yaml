@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-kubernetes-viewnamespaces
+  name: grafana-kubernetes-view_namespaces
   namespace: lma
   labels:
     grafana_dashboard: "1"
     app: grafana
 data:
-  kubernetes-ViewNamespaces.json: |-
+  kubernetes-View_Namespaces.json: |-
     {
       "annotations": {
         "list": [
@@ -1585,14 +1585,14 @@ data:
               "type": "prometheus",
               "uid": "${datasource}"
             },
-            "definition": "label_values(kube_pod_info, namespace)",
+            "definition": "label_values(kube_pod_info{taco_cluster=\"$taco_cluster\"}, namespace)",
             "hide": 0,
             "includeAll": true,
             "multi": true,
             "name": "namespace",
             "options": [],
             "query": {
-              "query": "label_values(kube_pod_info, namespace)",
+              "query": "label_values(kube_pod_info{taco_cluster=\"$taco_cluster\"}, namespace)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,
