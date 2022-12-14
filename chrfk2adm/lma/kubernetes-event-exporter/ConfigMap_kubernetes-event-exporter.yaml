@@ -37,7 +37,7 @@ data:
     [Filter]
       Name    modify
       Match   event.*
-      Add    cluster   taco-cluster.local
+      Add    cluster   cluster.local
     [Output]
       Name    loki
       Match    event.*
